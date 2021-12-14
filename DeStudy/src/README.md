@@ -55,7 +55,7 @@
  #### 1) 선택 시 해당되는 결과 페이지로 이동(프론트엔드)
  
  
-      <img src="/images/destudy1.gif" width="450" height="450" />
+ ![](./images/destudy1.gif)
  
  
  #### 2) '더 알아보기' JS 마우스 이벤트(프론트엔드)
