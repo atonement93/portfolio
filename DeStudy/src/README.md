@@ -519,5 +519,65 @@
  ### :loudspeaker: 트러블슈팅
  
  
+
+ #### 1) JS 반복문에서의 변수 키워드 트러블
+ 
+ 
+ ##### 문제.
+    
+    
+    
+핵심기능 2번의 <'더 알아보기' JS 마우스 이벤트(프론트엔드)> 기능을 개발 시에 트러블이 발생했다. 의도대로라면 가져온 선택자에 이벤트가 모두 적용이 되어야 하는데, 계속해서 1개의 선택자에만 이벤트가 적용되고 있었던 것이다. 코드는 아래와 같았다.
+    
+    
+    
+      for(const i=0;i<button.length;i++){
+        button[i].addEventListener("mouseover", function(){
+            more[i].classList.remove("hidden");
+            contents[i].classList.add("opacity");
+        })
+      }
+
+      for(const i=0;i<button.length;i++){
+        button[i].addEventListener("mouseout", function(){
+          more[i].classList.add("hidden");
+          contents[i].classList.remove("opacity");
+        })
+      }
+      
+      
+      
+코드를 계속 들여다보면서 생각해보니, for 반복문의 i 변수 키워드에 문제가 있다는 것을 깨달았다. 
+    
+    
+    
+JS의 변수 키워드는 var, const, let 3가지로 각각 다른 특성을 지닌다. 특히 var의 경우, 단점이 많은 키워드로 ES6 버전부터 let과 const가 이러한 단점을 보완하기 위해 등장한 키워드다. 따라서 각 키워드의 특징을 잘 알고 구별해서 써야 했는데, 이 부분을 간과하고 있었던 것이다.
+    
+    
+    
+##### 해결.
+    
+    
+기존에 작성한 코드에서 const는 '상수'의 특징을 가진 키워드로서, 값이 변하지 않아야 하는 경우에 쓰는 것이 적합하다. 따라서 for 반복문에서 반복적으로 실행되며 값이 변화해야 하는 변수의 키워드로는 적절하지 않다. 그래서 코드에서 const 키워드를 변화에 유연한 특징을 가진 let 키워드로 다음과 같이 변경해주었다. 이로써 의도대로 모든 선택자에 이벤트 효과가 나타날 수 있도록 수정할 수 있었다.
+    
+    
+    
+          for(let i=0;i<button.length;i++){
+        button[i].addEventListener("mouseover", function(){
+            more[i].classList.remove("hidden");
+            contents[i].classList.add("opacity");
+        })
+      }
+
+      for(let i=0;i<button.length;i++){
+        button[i].addEventListener("mouseout", function(){
+          more[i].classList.add("hidden");
+          contents[i].classList.remove("opacity");
+        })
+      }
+
+    
+    
+ 
  
  ### :loudspeaker: 회고
