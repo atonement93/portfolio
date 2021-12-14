@@ -196,16 +196,78 @@
  #### 3) 게시판 답글 기능(백엔드)
  
  
- #### 4) 게시판 조회수 증가 기능(백엔드)
+ 의견 게시판에서는 회원이 홈페이지에 추가를 요청하는 추천 자료를 게시글로 건의할 수 있는데,
+ 관리자가 이를 확인하여 답글을 작성할 수 있도록 답글 기능을 구현하였다.
  
  
- #### 5) 관리자와 일반회원 구분에 따라 접근 제한(백엔드)
+ ![](./images/답글.png)
  
  
- #### 6) 회원가입 시 아이디 중복확인 기능(백엔드)
+ 
+ Controller
+          //답글
+          @GetMapping("reply")
+          public String reply(@ModelAttribute QnaVO qnaVO) throws Exception {
+            return "qna/reply";
+          }
+
+          @PostMapping("reply")
+          public String reply(QnaVO qnaVO, BindingResult bindingResult, HttpSession session) throws Exception {
+            MemberVO memberVO = (MemberVO)session.getAttribute("member");
+            qnaVO.setWriter(memberVO.getId());
+            int result = qnaService.setReplyInsert(qnaVO);
+            return "redirect:../qna/list";
+          }
+          
+    
+    
+ Service
+        //답글
+        public int setReplyInsert(QnaVO qnaVO) throws Exception {
+          int result = qnaRepository.setReplyUpdate(qnaVO);
+          result = qnaRepository.setReplyInsert(qnaVO);
+          return result;
+        }
+        
+        
+        
+ Repository
+        //답글
+        public int setReplyInsert(QnaVO qnaVO)throws Exception;
+        public int setReplyUpdate(QnaVO qnaVO)throws Exception;
+        public int setRefUpdate(QnaVO qnaVO)throws Exception;
+        
+        
+        
+ Mapper
+        <insert id="setReplyInsert" parameterType="QnaVO" useGeneratedKeys="true" keyProperty="num">
+          insert into destudyqna (num, title, contents, writer, hit, date, ref, step, depth)
+          values (null, #{title}, #{contents}, #{writer}, 0, now(),
+          (select R.ref from (select * from destudyqna where num=#{num}) R),
+          (select S.step+1 from (select * from destudyqna where num=#{num}) S),
+          (select D.depth+1 from (select * from destudyqna where num=#{num}) D)
+          )
+        </insert>
+
+        <update id="setReplyUpdate" parameterType="QnaVO">
+          update destudyqna set step=step+1
+          where ref=(select R.ref from (select ref from destudyqna where num=#{num}) R)
+          and
+          step > (select S.step from (select step from destudyqna where num=#{num}) S)
+        </update>
+
+        <update id="setRefUpdate" parameterType="QnaVO">
+          update destudyqna set ref=#{num} where num=#{num}
+        </update>
  
  
- #### 7) 회원가입 시 이메일 가져오기 기능(프론트엔드 & 백엔드)
+ #### 4) 관리자와 일반회원 구분에 따라 접근 제한(백엔드)
+ 
+ 
+ #### 5) 회원가입 시 아이디 중복확인 기능(백엔드)
+ 
+ 
+ #### 6) 회원가입 시 이메일 가져오기 기능(프론트엔드 & 백엔드)
  
  
  
