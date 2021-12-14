@@ -45,7 +45,7 @@
 
 
 
-* 프론트엔드 구현 담당
+* 프론트엔드 구현
 
 ##### :bell: 사용기술
 > ###### 프론트엔드 HTML5, CSS3, ES6, JQuery / 백엔드 Java, Spring 4, Oracle
