@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.example.demo.notice.NoticeRepository">
+  	<select id="getList" parameterType="Pager" resultType="NoticeVO">
+  		select * from destudynotice
+  		where
+  			<choose>
+  				<when test="kind == 'writer'">writer</when>
+  				<when test="kind == 'contents'">contents</when>
+  				<otherwise>title</otherwise>
+  			</choose>
+  		like concat('%', #{search}, '%')
+  		order by num desc
+  		limit #{startRow}, #{perPage}
+  	</select>
+  	
+  	<select id="getTotalCount" parameterType="Pager" resultType="Long">
+  		select count(num) from notice
+  		where
+  			<choose>
+  				<when test="kind == 'writer'">writer</when>
+  				<when test="kind == 'contents'">contents</when>
+  				<otherwise>title</otherwise>
+  			</choose>
+  		like concat('%', #{search}, '%')
+  	</select>
+  	
+  	<select id="getSelect" parameterType="NoticeVO" resultMap="selectResult">
+  		select N.*, NF.* from
+  		destudynotice N left join destudynoticefiles NF
+  		on (N.num = NF.num)
+  		where N.num=#{num}
+  	</select>
+  	
+  	<update id="upHit" parameterType="int">
+  		update destudynotice set hit = hit + 1
+  		where num=#{num}
+  	</update>
+  	
+  	<resultMap type="NoticeVO" id="selectResult">
+		<id column="num" property="num"/>
+		<result column="title" property="title"/>
+		<result column="contents" property="contents"/>
+		<result column="writer" property="writer"/>
+		<result column="hit" property="hit"/>
+		<result column="date" property="date"/>
+		<collection property="fileList" javaType="List" ofType="NoticeFileVO">
+			<id column="fileNum" property="fileNum"/>
+			<result column="fileName" property="fileName"/>
+			<result column="oriName" property="oriName"/>
+		</collection>
+	</resultMap>
+	
+	<insert id="setFileInsert" parameterType="NoticeFileVO">
+		insert into destudynoticefiles values(null, #{num}, #{fileName}, #{oriName})
+	</insert>
+  	
+  	<insert id="setInsert" parameterType="NoticeVO" useGeneratedKeys="true" keyProperty="num">
+  		insert into destudynotice (num, title, contents, writer, hit, date)
+  		values (#{num}, #{title}, #{contents}, #{writer}, 0, now())
+  	</insert>
+  	
+  	<update id="setUpdate" parameterType="NoticeVO">
+  		update destudynotice set title=#{title}, contents=#{contents}
+  		where num=#{num}
+  	</update>
+  	
+  	<delete id="setDelete" parameterType="NoticeVO">
+  		delete from destudynotice where num=#{num}
+  	</delete>
+  </mapper>
+  
