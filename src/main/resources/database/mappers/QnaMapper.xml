@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.example.demo.qna.QnaRepository">
+	<select id="getList" parameterType="Pager" resultType="QnaVO">
+  		select * from destudyqna
+  		where
+  			<choose>
+  				<when test="kind == 'writer'">writer</when>
+  				<when test="kind == 'contents'">contents</when>
+  				<otherwise>title</otherwise>
+  			</choose>
+  		like concat('%', #{search}, '%')
+  		order by ref desc, step asc
+  		limit #{startRow}, #{perPage}
+  	</select>
+  	
+  	<select id="getTotalCount" parameterType="Pager" resultType="Long">
+  		select count(num) from destudyqna
+  		where
+  			<choose>
+  				<when test="kind == 'writer'">writer</when>
+  				<when test="kind == 'contents'">contents</when>
+  				<otherwise>title</otherwise>
+  			</choose>
+  		like concat('%', #{search}, '%')
+  	</select>
+  	
+  	<select id="getSelect" parameterType="QnaVO" resultType="QnaVO">
+  		select * from destudyqna where num=#{num}
+  	</select>
+  	
+  	<update id="upHit" parameterType="int">
+  		update destudyqna set hit = hit + 1
+  		where num=#{num}
+  	</update>
+  	
+  	 <update id="pageView">
+  		update destudyqna set hit = hit + 1
+  		where id = #{id}
+  	</update>
+  	
+  	<insert id="setInsert" parameterType="QnaVO" useGeneratedKeys="true" keyProperty="num">
+  		insert into destudyqna (num, title, contents, writer, hit, date, ref, step, depth)
+  		values (#{num}, #{title}, #{contents}, #{writer}, 0, now(), #{num}, 0, 0)
+  	</insert>
+  	
+  	<update id="setUpdate" parameterType="QnaVO">
+  		update destudyqna set title=#{title}, contents=#{contents}
+  		where num=#{num}
+  	</update>
+  	
+  	<delete id="setDelete" parameterType="QnaVO">
+  		delete from destudyqna where num=#{num}
+  	</delete>
+  	
+  	<insert id="setReplyInsert" parameterType="QnaVO" useGeneratedKeys="true" keyProperty="num">
+  		insert into destudyqna (num, title, contents, writer, hit, date, ref, step, depth)
+  		values (null, #{title}, #{contents}, #{writer}, 0, now(),
+  		(select R.ref from (select * from destudyqna where num=#{num}) R),
+  		(select S.step+1 from (select * from destudyqna where num=#{num}) S),
+  		(select D.depth+1 from (select * from destudyqna where num=#{num}) D)
+  		)
+  	</insert>
+  	
+  	<update id="setReplyUpdate" parameterType="QnaVO">
+  		update destudyqna set step=step+1
+  		where ref=(select R.ref from (select ref from destudyqna where num=#{num}) R)
+  		and
+  		step > (select S.step from (select step from destudyqna where num=#{num}) S)
+  	</update>
+  	
+  	<update id="setRefUpdate" parameterType="QnaVO">
+  		update destudyqna set ref=#{num} where num=#{num}
+  	</update>
+</mapper>
