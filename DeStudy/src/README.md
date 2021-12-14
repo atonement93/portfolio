@@ -55,11 +55,143 @@
  #### 1) 선택 시 해당되는 결과 페이지로 이동(프론트엔드)
  
  
+ 
+ 아래처럼 총 3개의 질문을 거쳐 해당하는 결과 페이지(추천 학습자료 페이지)로 이동하게 된다.
  ![](./images/destudy1.gif)
+ ![](./images/destudy2.gif)
+ ![](./images/destudy3.gif)
+ 
+        //버튼 클릭 시 다음페이지 이동
+        button.addEventListener("click", function() {
+          let link = window.location.href;
+          if(link == "http://localhost:8080/common/ch1"){
+            choice = $(this).attr('class');
+            const a = {"a1" : choice};
+            localStorage.setItem('a1', JSON.stringify(a));
+            location.href="ch2";
+          }else if(link == "http://localhost:8080/common/ch2"){
+            choice = $(this).attr('class');
+            const a = {"a2" : choice};
+            localStorage.setItem('a2', JSON.stringify(a));
+            location.href="ch3";
+          }else {
+            choice = $(this).attr('class');
+            const a = {"a3" : choice};
+            localStorage.setItem('a3', JSON.stringify(a));
+            result();
+          }
+        })
+  
+        //결과 출력 후 해당 페이지로 이동
+      function result() {
+        const r1 = JSON.parse(localStorage.getItem('a1'));
+        const r2= JSON.parse(localStorage.getItem('a2'));
+        const r3= JSON.parse(localStorage.getItem('a3'));
+
+        //선택된 결과
+        const result = [r1.a1, r2.a2, r3.a3];
+
+        //존재하는 결과들 14개
+        const results = [
+          ["0", "0", "0"], //0, 컴퓨터공학 기초 기본서
+          ["0", "0", "1"], //1, 컴퓨터공학 기초 온라인 강의
+          ["1", "0", "0"], //2, HTML/CSS 초급 기본서
+          ["1", "0", "1"], //3, HTML/CSS 초급 온라인 강의
+          ["1", "1", "0"], //4, HTML/CSS 중상급 기본서
+          ["1", "1", "1"], //5, HTML/CSS 중상급 온라인 강의
+          ["2", "0", "0"], //6, Javascript 초급 기본서
+          ["2", "0", "1"], //7, Javascript 초급 온라인 강의
+          ["2", "1", "0"], //8, Javascript 중상급 기본서
+          ["2", "1", "1"], //9, Javascript 중상급 온라인 강의
+          ["3", "0", "0"], //10, Java 초급 기본서
+          ["3", "0", "1"], //11, Java 초급 온라인 강의
+          ["3", "1", "0"], //12, Java 중상급 기본서
+          ["3", "1", "1"], //13, Java 중상급 온라인 강의
+        ];
+
+        for(let i=0;i<14;i++){
+          if(JSON.stringify(result) == JSON.stringify(results[i])){
+            location.href="../result/"+i;
+          }else {
+          }	
+        }
+      }
  
  
  #### 2) '더 알아보기' JS 마우스 이벤트(프론트엔드)
  
+ 
+   추천 자료들을 한 눈에 볼 수 있도록 선택지의 결과들을 한 페이지에 정리하였다.
+   
+   
+   해당 페이지에서 항목에 마우스를 대면 '더 알아보기' 폰트가 나타나면서 이미지는 흐려지는 이벤트가 나타나며, 클릭 시 자세한 정보를 알 수 있는 페이지로 이동한다.
+   
+   
+   ![](./images/destudy4.gif)
+   
+ 
+   ##### HTML
+   
+   
+   
+                <ul>
+                  <li>
+                    <button class="button">
+                      <div class="more hidden">
+                        <a href="https://www.aladin.co.kr/shop/wproduct.aspx?ItemId=141042179" target="_blank"><h5>더 알아보기</h5></a>
+                      </div>
+                      <article class="contents">
+                        <img src="../images/컴퓨터과학.jpg" alt="책사진" width="250" height="290">
+                        <br><h6>한 권으로 그리는 컴퓨터과학 로드맵</h6>
+                      </article>
+                    </button>
+                  </li>
+                  <li>
+                    <button class="button">
+                      <div class="more hidden">
+                        <a href="https://www.aladin.co.kr/shop/wproduct.aspx?ItemId=83064510" target="_blank"><h5>더 알아보기</h5></a>
+                      </div>
+                      <article class="contents">
+                        <img src="../images/기초튼튼.png" alt="책사진" width="250" height="290">
+                        <br><h6>다 함께 프로그래밍</h6>
+                      </article>
+                    </button>
+                  </li>
+                  <li>
+                    <button class="button">
+                      <div class="more hidden">
+                        <a href="https://www.aladin.co.kr/shop/wproduct.aspx?ItemId=268444562" target="_blank"><h5>더 알아보기</h5></a>
+                      </div>
+                      <article class="contents">
+                        <img src="../images/한권으로읽는컴퓨터.jpg" alt="책사진" width="250" height="290">
+                        <br><h6>한 권으로 읽는 컴퓨터 구조와 프로그래밍</h6>
+                      </article>
+                    </button>
+                  </li>
+                </ul>
+                
+  ##### JS
+  
+  
+  
+                
+              const more = document.querySelectorAll(".more");
+              const contents = document.querySelectorAll(".contents");
+              const button = document.querySelectorAll(".button");
+
+              for(let i=0;i<button.length;i++){
+                button[i].addEventListener("mouseover", function(){
+                    more[i].classList.remove("hidden");
+                    contents[i].classList.add("opacity");
+                })
+              }
+
+              for(let i=0;i<button.length;i++){
+                button[i].addEventListener("mouseout", function(){
+                  more[i].classList.add("hidden");
+                  contents[i].classList.remove("opacity");
+                })
+              }
  
  #### 3) 게시판 답글 기능(백엔드)
  
