@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nj.pa.board.BoardDAO">
+	<select id="get_list" resultType="BoardDTO">
+		SELECT * FROM MUSIC_QNA ORDER BY NUM DESC
+	</select>
+	
+	<select id="board_select" resultType="BoardDTO" parameterType="BoardDTO">
+		SELECT * FROM MUSIC_QNA WHERE NUM = #{num}
+	</select>
+	
+	<insert id="board_insert" parameterType="BoardDTO">
+		INSERT INTO MUSIC_QNA VALUES(
+		MUSIC_QNA_SEQ.NEXTVAL,
+		#{title},
+		SYSDATE,
+		#{write_con},
+		#{writer}
+		)
+	</insert>
+	
+	<delete id="board_del" parameterType="BoardDTO">
+		DELETE FROM MUSIC_QNA WHERE NUM = #{num}
+	</delete>
+	
+	<update id="board_update" parameterType = "BoardDTO">
+		UPDATE MUSIC_QNA
+		SET 
+		TITLE = #{title} ,
+		WRITE_CON = #{write_con}
+		WHERE
+		NUM = #{num}
+	</update>
+	
+	<select id="comment_list" resultType="CommentDTO">
+		SELECT * FROM MUSIC_COMMENT
+	</select>
+	
+	<insert id="comment_insert" parameterType="CommentDTO">
+		INSERT INTO MUSIC_COMMENT VALUES (
+			COMMENT_NUM_SEQ.NEXTVAL,
+			#{id},
+			#{comment_txt},
+			SYSDATE
+		)
+	</insert>
+	<delete id="comment_del" parameterType="CommentDTO">
+		DELETE FROM MUSIC_COMMENT WHERE COMMENT_NUM = #{comment_num}
+	</delete>
+</mapper>
