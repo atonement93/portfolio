@@ -562,7 +562,7 @@ JS의 변수 키워드는 var, const, let 3가지로 각각 다른 특성을 지
     
     
     
-          for(let i=0;i<button.length;i++){
+      for(let i=0;i<button.length;i++){
         button[i].addEventListener("mouseover", function(){
             more[i].classList.remove("hidden");
             contents[i].classList.add("opacity");
@@ -575,9 +575,15 @@ JS의 변수 키워드는 var, const, let 3가지로 각각 다른 특성을 지
           contents[i].classList.remove("opacity");
         })
       }
+ 
+ 
+
+ #### 2) 아이디 중복확인 버튼 클릭 시 
+
+
 
     
     
  
  
- ### :loudspeaker: 회고
+ ### :sparkles: 회고
