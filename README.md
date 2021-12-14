@@ -1,5 +1,5 @@
 # 현명희 포트폴리오
-> ### :information_desk_person: 고객의 관점을 헤아리는 프론트엔드 개발자
+> ### :information_desk_person: 고객의 입장을 헤아리는 프론트엔드 개발자
 
 
 
