@@ -130,7 +130,7 @@
    ![](./images/destudy4.gif)
    
  
-   ##### HTML
+   HTML
    
    
    
@@ -170,7 +170,7 @@
                   </li>
                 </ul>
                 
-  ##### JS
+  JS
   
   
   
@@ -205,6 +205,9 @@
  
  
  Controller
+ 
+ 
+ 
           //답글
           @GetMapping("reply")
           public String reply(@ModelAttribute QnaVO qnaVO) throws Exception {
@@ -222,6 +225,9 @@
     
     
  Service
+ 
+ 
+ 
         //답글
         public int setReplyInsert(QnaVO qnaVO) throws Exception {
           int result = qnaRepository.setReplyUpdate(qnaVO);
@@ -232,6 +238,9 @@
         
         
  Repository
+ 
+ 
+ 
         //답글
         public int setReplyInsert(QnaVO qnaVO)throws Exception;
         public int setReplyUpdate(QnaVO qnaVO)throws Exception;
@@ -240,6 +249,9 @@
         
         
  Mapper
+ 
+ 
+ 
         <insert id="setReplyInsert" parameterType="QnaVO" useGeneratedKeys="true" keyProperty="num">
           insert into destudyqna (num, title, contents, writer, hit, date, ref, step, depth)
           values (null, #{title}, #{contents}, #{writer}, 0, now(),
@@ -264,11 +276,226 @@
  #### 4) 관리자와 일반회원 구분에 따라 접근 제한(백엔드)
  
  
- #### 5) 회원가입 시 아이디 중복확인 기능(백엔드)
+ 
+ 공지사항 게시판의 경우, 관리자만 글쓰기 및 글 수정하기, 글 삭제하기가 가능하다.
+ 
+ 
+ 
+ 공지사항 게시판에서 해당 기능으로 이동하면 인터셉터를 통해 회원인지부터 검사하는데, 로그인이 되어있지 않다면 로그인 페이지로 이동하고, 로그인이 되어있는데 일반회원이라면 경고창과 함께 다시 글 목록 페이지로 이동한다.
+ 
+ 
+ 
+ ![](./images/공지사항.png)
+ 
+ 
+ 
+        @Override
+        public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+            throws Exception {
+
+          HttpSession session = request.getSession();
+          MemberVO memberVO = (MemberVO)session.getAttribute("member");
+
+          // 로그인 안됨 or 로그인 되었으나 관리자가 아님
+          if(memberVO == null || memberVO.getRole().equals("2")){
+              request.setAttribute("message", "접근권한이 없습니다.");
+              request.setAttribute("path", "/notice/list");
+              RequestDispatcher view = request.getRequestDispatcher("/WEB-INF/views/common/adminAccess.jsp");
+              view.forward(request, response);
+              return false;
+          //관리자 확인됨
+          }else {
+            return true;
+          }
+        }
+ 
+ 
+ 
+ 
+ 의견 게시판의 경우, 글쓰기 및 글 상세보기는 관리자와 일반회원만 가능하다.
+ 
+ 
+ 
+ 글쓰기 및 글 상세보기로 이동했을 때 인터셉터를 통해 검사하는데, 로그인이 되어있지 않다면 경고창과 함께 로그인 페이지로 이동한다.
+ 
+ 
+ 
+ ![](./images/의견.png)
+ 
+ 
+ 
+        @Override
+        public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+            throws Exception {
+
+          HttpSession session = request.getSession();
+          MemberVO memberVO = (MemberVO)session.getAttribute("member");
+
+          //로그인 안됨
+          if(memberVO == null) {
+            request.setAttribute("message", "등록된 회원이 아닙니다.");
+            request.setAttribute("path", "/member/login");
+            RequestDispatcher view = request.getRequestDispatcher("/WEB-INF/views/common/memberAccess.jsp");
+            view.forward(request, response);
+            return false;
+          //로그인 되어있음
+          }else {
+            return true;
+          }
+        }
+ 
+ 
+ 
+ 
+ #### 5) 회원가입 시 아이디 중복확인 기능(프론트엔드 & 백엔드)
+ 
+ 
+ 
+ 회원가입 시 아이디 중복확인 검사가 가능하다. 아이디 입력 후 중복확인 버튼을 클릭했을 때, 이미 존재하는 아이디라면 사용불가 안내를, 존재하지 않는 아이디라면 사용가능 안내를 표시한다.
+ 
+ 
+ 
+ 
+ ![](./images/아이디중복1.png)
+ ![](./images/아이디중복2.png)
+ 
+ 
+ 
+ JS
+ 
+ 
+ 
+        //아이디 중복확인
+        $("#overlappedID").click(function(){
+          $("#signup").attr("type", "button");
+          const id = $("#user_id").val();
+          $.ajax({
+          type: "get",
+          async: false,
+          url: "http://localhost:8080/member/idCheck",
+          data: {id: id},
+          success: function (data) {
+          if(data == 1) {
+            $("#olmessage").text("이미 사용중인 ID 입니다.");
+            $("#olmessage").addClass("olmessagef");
+            $("#olmessage").removeClass("olmessaget");
+            }else {
+            $("#olmessage").text("사용 가능한 ID 입니다.");
+            $("#olmessage").addClass("olmessaget");
+            $("#olmessage").removeClass("olmessagef");
+            $("#signup").attr("type", "submit");
+            }
+            }
+          })
+          });
+          
+          
+          
+ Controller
+ 
+ 
+ 
+        //아이디 중복확인
+        @ResponseBody
+        @GetMapping("idCheck")
+        public int overlappedID(MemberVO memberVO) throws Exception{
+          int result = memberService.overlappedID(memberVO);
+          //System.out.println(result);
+          return result;
+        }
+ 
+ 
+ 
+ Service
+ 
+ 
+ 
+        //아이디 중복확인
+        public int overlappedID(MemberVO memberVO) throws Exception{
+          int result = memberRepository.overlappedID(memberVO);
+          return result;
+        }
+        
+        
+        
+ Repository
+ 
+ 
+ 
+        //아이디 중복확인
+        public int overlappedID(MemberVO memberVO) throws Exception;
+        
+        
+        
+ Mapper
+ 
+ 
+        <select id="overlappedID" parameterType="MemberVO" resultType="int">
+          select count(id) From destudymember where id=#{id}
+        </select>
+ 
  
  
  #### 6) 회원가입 시 이메일 가져오기 기능(프론트엔드 & 백엔드)
  
+ 
+ 
+ 회원가입 시 작성하는 이메일은 총 3개의 값을 갖는다. 아이디, '@' 기호, 도메인주소다.
+ 
+ 
+ 
+ 프론트엔드에서는 이들 세 영역을 나누었고, 도메인주소는 datalist 태그를 이용하여 기존 값에서 선택도 가능하도록 하였다.
+ 
+ 
+ 
+ 그 다음 입력된 값을 모두 가져와 3개의 값을 하나의 이메일 주소로 합쳐 서버로 보내면, 서버가 이를 1개의 이메일 주소로 인식하고 DB에 저장할 수 있도록 구현하였다.
+ 
+ 
+ 
+ ![](./images/이메일.gif)
+ 
+ 
+ 
+ 
+ HTML
+ 
+ 
+ 
+        <h3>이메일</h3>
+          <input type="text" id="user_email" required><span id="middle">@</span><input type="text" id="email_address" list="user_email_address">
+          <datalist id="user_email_address">
+            <option value="naver.com"></option>
+            <option value="daum.com"></option>
+            <option value="google.com"></option>
+            <option value="직접입력"></option>
+          </datalist>
+          <input type="hidden" id="totalemail" name="email" value="">
+ 
+ 
+ 
+ JS
+ 
+ 
+
+        //이메일주소 가져오기
+        $("#user_email").blur(function(){
+          email();	
+        });
+
+        $("#email_address").change(function(){
+          email();	
+        });
+
+        function email() {
+          //console.log('change');
+          const email = $("#user_email").val();
+          const middle = $("#middle").text();
+          const address = $("#email_address").val();
+          if(email != "" && address != "") {
+            $("#totalemail").val(email+middle+address);
+          }
+        };
+        
  
  
  ### :loudspeaker: 트러블슈팅
